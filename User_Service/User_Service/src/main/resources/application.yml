@@ -1,0 +1,76 @@
+
+server:
+  port: 8081
+  
+ 
+spring:
+  application:
+    name: USERSERVICE
+
+  datasource:
+   url: jdbc:mysql://localhost:3306/microServices_rating_services?createDatabaseIfNotExist=TRUE
+   username: root
+   password: sayan
+  
+  
+  config:
+    import: "optional:configserver: http://localhost:8085"
+
+  
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    
+    
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+      
+      
+      
+resilience4j:
+  circuitbreaker:
+    instances:
+      RatingHotelBraker: 
+        register-health-indicator: true
+        event-consumer-buffer-size: 10
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 6s
+    
+    
+  retry:
+    instances:
+      RatingHotelRetry:
+        max-attempts: 3
+        wait-duration: 5s
+  
+  ratelimiter:
+    instances:
+      RatingHotelRateLimiter:
+        limit-refresh-period: 4s
+        limit-for-period: 2
+        timeout-duration: 0s
+  
+  
+ 
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#  client:
+#    fetch-registry: true
+#    register-with-eureka: true
+#    service-url:
+#      defualt: http://localhost:8761/euraka
